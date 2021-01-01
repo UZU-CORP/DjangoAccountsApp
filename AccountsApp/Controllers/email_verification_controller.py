@@ -1,3 +1,4 @@
+from AccountsApp.constants import EMAIL_VERIF_URL
 from django.contrib.auth import login
 from AccountsApp.Models.verification import Verification
 
@@ -18,16 +19,19 @@ class EmailVerificationController(Controller):
     def __init__(self):
         self.base_url = settings.ACCOUNTS_APP['base_url']
 
-    @Controller.route('send-verification-link')
+    @Controller.route('send-email-verification-link')
     @Controller.decorate(api_view(['POST']))
     def send_verification_link(self, request: Request):
         user = Misc.resolve_user(request)
         service = EmailVerificationService(user, self.base_url)
-        service.send_verification_link(request.META["HTTP_HOST"])
+        service.send_verification_link(
+            "https://"+request.META["HTTP_HOST"], 
+            EMAIL_VERIF_URL
+        )
         return json_response(True)
 
     
-    @Controller.route('send-verification-link')
+    @Controller.route('send-email-verification-code')
     @Controller.decorate(api_view(['POST']))
     def send_verification_code(self, request):
         user = Misc.resolve_user(request)
@@ -35,7 +39,7 @@ class EmailVerificationController(Controller):
         service.send_verification_code()
         return json_response(True)
     
-    @Controller.route('verify-code')
+    @Controller.route('verify-email-code')
     @Controller.decorate(api_view(['POST']))
     def verify_code(self, request):
         form = SubmitEmailCode(request.data)
@@ -45,7 +49,7 @@ class EmailVerificationController(Controller):
         return json_response(True)
         
     
-    @Controller.route('verify-link')
+    @Controller.route(EMAIL_VERIF_URL)
     @Controller.decorate(api_view(['GET']))
     def verify_link(self, request):
         username_signature = request.GET.get("u", None)

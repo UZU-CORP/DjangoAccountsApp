@@ -31,6 +31,6 @@ class TestEmailVerificationService(TestCase):
         get_or_create.return_value = verification, True
         uri_path = self.faker.uri_path()
         service = EmailVerificationService(user, uri_path)
-        service.send_verification_link(self.faker.url())
+        service.send_verification_link(self.faker.url(), 'verify/')
         mailer.assert_called_once()
     

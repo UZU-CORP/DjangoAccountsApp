@@ -1,7 +1,9 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db.models.fields import proxy
+from rest_framework.exceptions import NotFound
 from AccountsApp.utils.code_generator import generate_number_code
 from datetime import timedelta
 from django.core.signing import BadSignature, TimestampSigner, SignatureExpired, Signer
@@ -18,7 +20,7 @@ class TwoFactorTokens(models.Model):
 
     choices = ((EMAIL, 'Email'), (OTP, "Otp"))
 
-    provider = models.CharField(choices=choices)
+    provider = models.CharField(choices=choices, max_length=7)
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, 
         related_name="two_factor_token"
@@ -29,10 +31,13 @@ class TwoFactorTokens(models.Model):
 
     @classmethod
     def Find(cls, provider: str, signature, code: str = None):
-        if provider == cls.OTP:
-            return OtpToken.Find(signature=signature)
-        else:
-            return EmailToken.Find(signature=signature, code=code)
+        try:
+            if provider == cls.OTP:
+                return OtpToken.Find(signature=signature)
+            else:
+                return EmailToken.Find(signature=signature, code=code)
+        except ObjectDoesNotExist:
+            raise NotFound
 
 
     @classmethod

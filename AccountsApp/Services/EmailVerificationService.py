@@ -16,9 +16,9 @@ class EmailVerificationService:
     def send_verification_code(self):
         send_email_verification_code(self.user, self.verification.code)
         
-    def send_verification_link(self, http_host: str):
+    def send_verification_link(self, http_host: str, base_url: str):
         url =  build_secure_url(
-            http_host, self.base_url, 'verify-link/', 
+            http_host, self.base_url, base_url, 
             self.verification.username_signature, 
             self.verification.code_signature
         )

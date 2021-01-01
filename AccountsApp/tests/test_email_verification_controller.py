@@ -1,9 +1,9 @@
+from AccountsApp.constants import EMAIL_VERIF_URL
 import json
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from AccountsApp.Services.EmailVerificationService import EmailVerificationService
-from django.http import request, response
-from AccountsApp.Controllers.EmailVerificationController import EmailVerificationController
+from AccountsApp.Controllers import EmailVerificationController
 from unittest import TestCase, mock
 from rest_framework.decorators import api_view
 from rest_framework.test import APIRequestFactory
@@ -16,10 +16,11 @@ class TestEmailVerificationController(TestCase, TestMixin):
         self.factory = APIRequestFactory()
         self.controller: EmailVerificationController = EmailVerificationController.get_instance()
         self.base_url: str = settings.ACCOUNTS_APP['base_url']
-        self.http_host = self.faker.url()
+        self.http_host = 'hello.com'
+        self.schemed_host = "https://{}".format(self.http_host)
 
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.EmailVerificationService")
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.Misc")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.EmailVerificationService")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.Misc")
     def test_send_verification_link(self, misc, service_class):
         user = mock.MagicMock(spec=AbstractBaseUser)
         misc.resolve_user.return_value = user
@@ -28,12 +29,14 @@ class TestEmailVerificationController(TestCase, TestMixin):
         request = self.factory.post('/send-verification-link/')
         request.META['HTTP_HOST'] = self.http_host
         response  = self.controller.send_verification_link(request)
-        service.send_verification_link.assert_called_once_with(self.http_host)
+        service.send_verification_link.assert_called_once_with(
+            self.schemed_host, EMAIL_VERIF_URL
+        )
         response_data = json.loads(response.content)
         self.assertTrue(response_data['status'])
     
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.EmailVerificationService")
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.Misc")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.EmailVerificationService")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.Misc")
     def test_send_verification_code(self, misc, service_class):
         user = mock.MagicMock(spec=AbstractBaseUser)
         misc.resolve_user.return_value = user
@@ -45,8 +48,8 @@ class TestEmailVerificationController(TestCase, TestMixin):
         response_data = json.loads(response.content)
         self.assertTrue(response_data['status'])
 
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.VerifierService")
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.Misc")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.VerifierService")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.Misc")
     def test_verify(self, misc, verifier):
         user_query = {"id": 1}
         misc.resolve_user_query.return_value = user_query
@@ -57,8 +60,8 @@ class TestEmailVerificationController(TestCase, TestMixin):
         response_data = json.loads(response.content)
         self.assertTrue(response_data['status'])
 
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.settings.ACCOUNTS_APP")
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.VerifierService")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.settings.ACCOUNTS_APP")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.VerifierService")
     def test_verify_link_redirects_on_success(self, verifier, accounts):
         accounts_settings = {
             "sign_in_after_verification": False,
@@ -83,9 +86,9 @@ class TestEmailVerificationController(TestCase, TestMixin):
         response = self.controller.verify_link(request)
         self.assertEqual(response.status_code, 400)
     
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.login")
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.settings.ACCOUNTS_APP")
-    @mock.patch("AccountsApp.Controllers.EmailVerificationController.VerifierService")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.login")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.settings.ACCOUNTS_APP")
+    @mock.patch("AccountsApp.Controllers.email_verification_controller.VerifierService")
     def test_verify_link_login_on_success_if_set(self, verifier, accounts, login):
         accounts_settings = {
             "sign_in_after_verification": True,

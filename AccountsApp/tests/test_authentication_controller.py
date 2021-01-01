@@ -2,7 +2,7 @@ from django.http import response
 from AccountsApp.Services import VerifierService
 import json
 from django.contrib.auth.base_user import AbstractBaseUser
-from AccountsApp.Controllers.AuthController import AuthController
+from AccountsApp.Controllers import AuthController
 from unittest import mock, TestCase
 from faker import Faker
 from rest_framework.test import APIRequestFactory
@@ -15,9 +15,10 @@ class TestAuthenticationController(TestCase):
         self.factory = APIRequestFactory()
         self.controller: AuthController = AuthController.get_instance()
     
-    @mock.patch("AccountsApp.Controllers.AuthController.User")
-    @mock.patch("AccountsApp.Controllers.AuthController.login")
-    def test_signup(self, login, User):
+    @mock.patch("AccountsApp.Controllers.auth_controller.SignedUp")
+    @mock.patch("AccountsApp.Controllers.auth_controller.User")
+    @mock.patch("AccountsApp.Controllers.auth_controller.login")
+    def test_signup(self, login, User, signal):
         user = mock.MagicMock(spec=AbstractBaseUser)
         User.return_value = user
         data = {
@@ -31,14 +32,15 @@ class TestAuthenticationController(TestCase):
         response = self.controller.signup(request)
         password = data.pop("password")
         User.assert_called_with(**data)
+        signal.send.assert_called_once()
         user.set_password.assert_called_once_with(password)
         login.assert_called_once()
         response_data = json.loads(response.content)
         self.assertTrue(response_data['status'])
 
-    @mock.patch("AccountsApp.Controllers.AuthController.User")
-    @mock.patch("AccountsApp.Controllers.AuthController.login")
-    @mock.patch("AccountsApp.Controllers.AuthController.authenticate")
+    @mock.patch("AccountsApp.Controllers.auth_controller.User")
+    @mock.patch("AccountsApp.Controllers.auth_controller.login")
+    @mock.patch("AccountsApp.Controllers.auth_controller.authenticate")
     def test_signin_without_two_fa(self, authenticate, login, User):
         user = mock.MagicMock(spec=AbstractBaseUser)
         User.USERNAME_FIELD = "username"
@@ -54,9 +56,9 @@ class TestAuthenticationController(TestCase):
         response_data = json.loads(response.content)
         self.assertTrue(response_data['status'])
     
-    @mock.patch("AccountsApp.Controllers.AuthController.TwoFactorService")
-    @mock.patch("AccountsApp.Controllers.AuthController.User")
-    @mock.patch("AccountsApp.Controllers.AuthController.authenticate")
+    @mock.patch("AccountsApp.Controllers.auth_controller.TwoFactorService")
+    @mock.patch("AccountsApp.Controllers.auth_controller.User")
+    @mock.patch("AccountsApp.Controllers.auth_controller.authenticate")
     def test_signin_with_two_fa(self, authenticate, User, two_fa_service):
         user = mock.MagicMock(spec=AbstractBaseUser)
         User.USERNAME_FIELD = "username"
@@ -100,8 +102,8 @@ class TestAuthenticationController(TestCase):
         response_data = json.loads(response.content)
         self.assertFalse(response_data['status'])
 
-    @mock.patch("AccountsApp.Controllers.AuthController.Misc")
-    @mock.patch("AccountsApp.Controllers.AuthController.PasswordResetService")
+    @mock.patch("AccountsApp.Controllers.auth_controller.Misc")
+    @mock.patch("AccountsApp.Controllers.auth_controller.PasswordResetService")
     def test_send_password_reset_link(self, reset_service, misc):
         user_query = {"id": 1}
         misc.resolve_user_query.return_value = user_query
@@ -112,8 +114,8 @@ class TestAuthenticationController(TestCase):
         self.assertTrue(response_data['status'])
         reset_service.send_reset_link.assert_called_once()
 
-    @mock.patch("AccountsApp.Controllers.AuthController.Misc")
-    @mock.patch("AccountsApp.Controllers.AuthController.PasswordResetService")
+    @mock.patch("AccountsApp.Controllers.auth_controller.Misc")
+    @mock.patch("AccountsApp.Controllers.auth_controller.PasswordResetService")
     def test_send_password_reset_code(self, reset_service, misc):
         user_query = {"id": 1}
         misc.resolve_user_query.return_value = user_query
@@ -125,7 +127,7 @@ class TestAuthenticationController(TestCase):
         self.assertTrue(response_data['status'])
         reset_service.send_reset_code.assert_called_once()
 
-    @mock.patch("AccountsApp.Controllers.AuthController.VerifierService")
+    @mock.patch("AccountsApp.Controllers.auth_controller.VerifierService")
     def test_reset_password_code_sets_password_if_valid(self, Verifier):
         data = {
             "code": str(self.faker.random_number),
@@ -144,7 +146,7 @@ class TestAuthenticationController(TestCase):
         self.assertTrue(response_data['status'])
 
 
-    @mock.patch("AccountsApp.Controllers.AuthController.login")
+    @mock.patch("AccountsApp.Controllers.auth_controller.login")
     def test_change_password(self, login):
         data = {
             "new_password": self.faker.word(),

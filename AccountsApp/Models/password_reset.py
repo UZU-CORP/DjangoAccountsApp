@@ -33,7 +33,7 @@ class PasswordReset(models.Model):
         return self.code, self.signature
         
     def is_expired(self):
-        duration = settings.ACCOUNTS_APP["reset_timeout"] or 30
+        duration = settings.ACCOUNTS_APP.get("reset_timeout", 30)
         max_age = timedelta(minutes=duration)
         try:
             TimestampSigner().unsign(self.signature, max_age=max_age)
