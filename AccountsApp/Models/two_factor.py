@@ -19,7 +19,10 @@ class TwoFactorTokens(models.Model):
     choices = ((EMAIL, 'Email'), (OTP, "Otp"))
 
     provider = models.CharField(choices=choices)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, 
+        related_name="two_factor_token"
+    )
     code = models.CharField(max_length=100, null=True)
     signature = models.TextField(null=True)
 

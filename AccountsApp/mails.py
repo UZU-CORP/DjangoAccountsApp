@@ -11,3 +11,6 @@ def send_password_reset_code(user: AbstractBaseUser, code: str):
 
 def send_password_reset_link(user: AbstractBaseUser, url: str):
     pass
+
+def send_two_factor_token(user: AbstractBaseUser, code: str ):
+    pass

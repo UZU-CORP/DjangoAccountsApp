@@ -6,3 +6,4 @@ from .test_email_verification_service import TestEmailVerificationService
 from .test_verifier_service import TestVerifierService
 from .test_password_reset_service import TestPasswordResetService
 from .test_email_verification_controller import TestEmailVerificationController
+from .test_authentication_controller import TestAuthenticationController

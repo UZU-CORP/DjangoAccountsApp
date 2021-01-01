@@ -1,4 +1,7 @@
-import json
+from django.contrib.auth import login
+from AccountsApp.Models.verification import Verification
+
+from django.http.response import HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect
 from AccountsApp.forms import SubmitEmailCode
 from django.conf import settings
 from AccountsApp import Services
@@ -43,6 +46,19 @@ class EmailVerificationController(Controller):
         
     
     @Controller.route('verify-link')
-    @Controller.decorate(api_view(['POST']))
+    @Controller.decorate(api_view(['GET']))
     def verify_link(self, request):
-        pass
+        username_signature = request.GET.get("u", None)
+        code_signature = request.GET.get("c", None)
+        if not (username_signature or code_signature):
+            return HttpResponseBadRequest()
+        try:
+            user = VerifierService.verify_email_link(
+                username_signature, code_signature
+            )
+        except Verification.DoesNotExist:
+            return HttpResponseNotFound()
+        if settings.ACCOUNTS_APP.get("sign_in_after_verification", False):
+            login(request, user)
+        return_to  = settings.ACCOUNTS_APP.get("redirect_link", "/")
+        return HttpResponseRedirect(return_to)

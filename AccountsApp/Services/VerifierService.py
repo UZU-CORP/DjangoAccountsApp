@@ -19,7 +19,7 @@ def verify_email_link(username_sig: str, code_sig: int, ):
     )
     verification.verified = True
     verification.save()
-
+    return verification.user
 
 def verify_password_reset(code: str, signature: str):
     reset = PasswordReset.objects.get(code=code, signature=signature)
