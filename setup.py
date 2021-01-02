@@ -8,8 +8,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(
-    name = 'uzu-django-accounts',          
-    packages = find_packages(exclude=("tests",)),  
+    name = 'uzu-django-accounts',  
     version = '0.1.0',      
     license='MIT',        
     description = 'Uzu-django-accounts is a generic django application tailored to Single Page Applications that abstracts user authentication and verification from the rest of your project.',
@@ -27,5 +26,9 @@ setup(
         'Programming Language :: Python :: 3',      
         'Programming Language :: Python :: 3.6',
     ],
-    install_requires=["django", "htmailer", "djangorestframework"]
+    install_requires=["django", "htmailer", "djangorestframework"],
+    packages=find_packages(exclude=("AccountsApp.tests",)),
+    package_data = {
+        '': ['*.html', '*.txt'],
+    },
 )
