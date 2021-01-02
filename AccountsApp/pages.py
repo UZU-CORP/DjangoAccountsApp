@@ -1,3 +1,4 @@
+from AccountsApp.constants import EMAIL_VERIF_URL
 from django.urls import path
 from .Controllers import EmailVerificationController
 
@@ -6,5 +7,5 @@ def __verify_email(request):
     return controller.verify_link(request)
 
 urlpatterns = [
-    path("verify-link/", __verify_email),
+    path(EMAIL_VERIF_URL, __verify_email),
 ]  

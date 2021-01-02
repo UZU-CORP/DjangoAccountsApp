@@ -12,7 +12,7 @@ development.py
 .env
 PythonEnv
 ./*/development.py
-./migrations/*
+migrations/*
 # Log files
 npm-debug.log*
 yarn-debug.log*
