@@ -26,7 +26,7 @@ setup(
         'Programming Language :: Python :: 3',      
         'Programming Language :: Python :: 3.6',
     ],
-    install_requires=["django", "htmailer", "djangorestframework"],
+    install_requires=["django", "htmailer", "djangorestframework", "pyotp"],
     packages=find_packages(exclude=("AccountsApp.tests",)),
     package_data = {
         '': ['*.html', '*.txt'],

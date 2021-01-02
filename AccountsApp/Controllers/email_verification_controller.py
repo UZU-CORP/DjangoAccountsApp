@@ -49,7 +49,7 @@ class EmailVerificationController(Controller):
         return json_response(True)
         
     
-    @Controller.route(EMAIL_VERIF_URL)
+    @Controller.route("verify-email-link")
     @Controller.decorate(api_view(['GET']))
     def verify_link(self, request):
         username_signature = request.GET.get("u", None)

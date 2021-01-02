@@ -6,6 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.request import Request
 from posixpath import join as urljoin
+from urllib.parse import urlencode
 
 User =  get_user_model()
 UsernameField: str = User.USERNAME_FIELD
@@ -41,9 +42,7 @@ def build_secure_url(
     username_signature: str, code_signature: str
     ):
     url = urljoin(host, base_url, page_url)
-    url = url + "?u={}&c={}".format(
-        username_signature, 
-        code_signature
-    )
+    query = urlencode({"u": username_signature, 'c': code_signature })
+    url = f'{url}?{query}'
     return url
         

@@ -124,7 +124,7 @@ class AuthController(Controller):
         return json_response(True)
 
 
-    @Controller.route(PASSWORD_RESET_URL)
+    @Controller.route("reset-password-link")
     @Controller.decorate(api_view(['POST']))
     def reset_password_link(self, request: Request):
         response = json_response(False)
