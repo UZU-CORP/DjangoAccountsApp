@@ -9,7 +9,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name = 'uzu-django-accounts',  
-    version = '0.1.0',      
+    version = '0.1.1',      
     license='MIT',        
     description = 'Uzu-django-accounts is a generic django application tailored to Single Page Applications that abstracts user authentication and verification from the rest of your project.',
     long_description_content_type = "text/markdown",

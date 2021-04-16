@@ -30,10 +30,12 @@ class AuthController(Controller):
     @Controller.decorate(api_view(['POST']))
     def signup(self, request):
         form = self.get_signup_form()
+        payload = None
         if form:
             self.validate_form(form)
+            payload = form.cleaned_data
         try:
-            payload = request.data.dict().copy()
+            payload = payload or request.data.dict().copy()
             keep_signed_in = payload.pop("keep_signed_in", "false")
             password = payload.pop("password")
             user = User(**payload)
@@ -47,7 +49,6 @@ class AuthController(Controller):
             logger.error(e)
             return json_response(False, error="Signup error")
         except Exception as e:
-            raise e
             logger.error(e)
             return json_response(False, error="Signup error")
         else:
