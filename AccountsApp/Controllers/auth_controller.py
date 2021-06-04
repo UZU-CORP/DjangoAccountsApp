@@ -29,7 +29,8 @@ class AuthController(Controller):
     @Controller.route('sign-up')
     @Controller.decorate(api_view(['POST']))
     def signup(self, request):
-        form = self.get_signup_form()
+        Form = self.get_signup_form()
+        form = Form(request.data)
         payload = None
         if form:
             self.validate_form(form)
